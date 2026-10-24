@@ -28,6 +28,14 @@ Local-process filesystem/network sandbox tests require Linux; parsing and
 unsupported-platform checks still run on macOS. The optional Claude MCP isolation
 integration requires a local Claude Code 2.1.207+ CLI in the 2.1 release line.
 
+## Markdown Editor Dependencies
+
+The Markdown editor uses MDXEditor 4 with Lexical 0.48.0. Keep the UI's direct
+`lexical` and `@lexical/link` dependencies aligned with the root Lexical overrides
+and MDXEditor's supported version range. Lexical minor releases before 1.0 can
+contain breaking changes; do not independently bump them beyond that range.
+MDXEditor 4 no longer includes Sandpack; fenced code blocks use CodeMirror.
+
 ## Dependency Lockfile Policy
 
 GitHub Actions owns `pnpm-lock.yaml`.
