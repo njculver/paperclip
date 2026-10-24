@@ -95,6 +95,14 @@ TypeScript scripts use tsx 4.23.15, and direct esbuild dependencies and generate
 plugin scaffolds use esbuild 0.28.2. HTTP integration tests use Supertest 7.3.1
 with the shared loopback-binding setup.
 
+## Service SDK Dependencies
+
+The server uses AWS S3 SDK 3.1156.0 and OpenTelemetry API 1.10.0; the Cursor
+Cloud adapter uses Cursor SDK 1.0.40. SDK upgrades should cover S3 request
+serialization and response streams, AWS credential discovery, tracing context
+propagation, and Cursor execution and authentication contracts. Local SDK
+regressions use loopback endpoints or intercepted HTTP rather than live accounts.
+
 ## Dependency Lockfile Policy
 
 GitHub Actions owns `pnpm-lock.yaml`.
