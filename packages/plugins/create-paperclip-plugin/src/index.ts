@@ -196,12 +196,12 @@ export function scaffoldPluginProject(options: ScaffoldPluginOptions): string {
       "@paperclipai/plugin-sdk": sdkDependency,
       "@rollup/plugin-node-resolve": "^16.0.1",
       "@rollup/plugin-typescript": "^12.1.2",
-      "@types/node": "^24.6.0",
+      "@types/node": "^24.19.2",
       "@types/react": "^19.0.8",
       esbuild: "^0.27.3",
       rollup: "^4.38.0",
       tslib: "^2.8.1",
-      typescript: "^5.7.3",
+      typescript: "^6.0.3",
       vitest: "^3.0.5"
     },
     peerDependencies: {
@@ -219,6 +219,7 @@ export function scaffoldPluginProject(options: ScaffoldPluginOptions): string {
       lib: ["ES2022", "DOM"],
       jsx: "react-jsx",
       strict: true,
+      types: ["node"],
       skipLibCheck: true,
       declaration: true,
       declarationMap: true,

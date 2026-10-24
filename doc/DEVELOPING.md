@@ -28,6 +28,15 @@ Local-process filesystem/network sandbox tests require Linux; parsing and
 unsupported-platform checks still run on macOS. The optional Claude MCP isolation
 integration requires a local Claude Code 2.1.207+ CLI in the 2.1 release line.
 
+## TypeScript and Node Types
+
+Active workspace packages use TypeScript 6.0 and Node.js 24 type definitions,
+matching the minimum supported runtime. TypeScript 6 requires explicit ambient
+type inclusion; Node-aware configurations specify `types: ["node"]` (or extend
+the shared base configuration). Plugin scaffolds use the same compiler and Node
+type versions. Keep TypeScript below 7 until the telemetry extractor's compiler
+API integration has been migrated; TypeScript 7 replaces the legacy compiler API.
+
 ## Markdown Editor Dependencies
 
 The Markdown editor uses MDXEditor 4 with Lexical 0.48.0. Keep the UI's direct
