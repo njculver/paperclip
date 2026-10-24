@@ -87,6 +87,14 @@ platform-native packages as optional dependencies. Verify real database startup,
 migrations, and bundled staging when upgrading; do not replace or reset existing
 local database directories as part of a dependency upgrade.
 
+## Image and Build Tooling Dependencies
+
+Org-chart PNG exports use Sharp 0.35, which supplies its own TypeScript
+definitions; do not install the deprecated `@types/sharp` stub. Active workspace
+TypeScript scripts use tsx 4.23.15, and direct esbuild dependencies and generated
+plugin scaffolds use esbuild 0.28.2. HTTP integration tests use Supertest 7.3.1
+with the shared loopback-binding setup.
+
 ## Dependency Lockfile Policy
 
 GitHub Actions owns `pnpm-lock.yaml`.
