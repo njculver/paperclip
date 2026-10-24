@@ -1,3 +1,4 @@
+import { partialWithoutDefaults } from "./partial.js";
 import { z } from "zod";
 import { PERMISSION_KEYS } from "../constants.js";
 import { MAX_COMPANY_ATTACHMENT_MAX_BYTES } from "../constants.js";
@@ -8,15 +9,14 @@ import {
 } from "./issue.js";
 import { routineVariableSchema } from "./routine.js";
 
-export const portabilityIncludeSchema = z
+export const portabilityIncludeSchema = partialWithoutDefaults(z
   .object({
     company: z.boolean().optional(),
     agents: z.boolean().optional(),
     projects: z.boolean().optional(),
     issues: z.boolean().optional(),
     skills: z.boolean().optional(),
-  })
-  .partial();
+  }));
 
 export const portabilityEnvInputSchema = z.object({
   key: z.string().min(1),
@@ -230,7 +230,7 @@ export const portabilityManifestSchema = z.object({
   generatedAt: z.string().datetime(),
   source: z
     .object({
-      companyId: z.string().uuid(),
+      companyId: z.guid(),
       companyName: z.string().min(1),
     })
     .nullable(),
@@ -277,7 +277,7 @@ export const portabilityTargetSchema = z.discriminatedUnion("mode", [
   }),
   z.object({
     mode: z.literal("existing_company"),
-    companyId: z.string().uuid(),
+    companyId: z.guid(),
   }),
 ]);
 
@@ -297,7 +297,7 @@ export const companyPortabilityExportSchema = z.object({
   projectIssues: z.array(z.string().min(1)).optional(),
   selectedFiles: z.array(z.string().min(1)).optional(),
   expandReferencedSkills: z.boolean().optional(),
-  sidebarOrder: portabilitySidebarOrderSchema.partial().optional(),
+  sidebarOrder: partialWithoutDefaults(portabilitySidebarOrderSchema).optional(),
 });
 
 export type CompanyPortabilityExport = z.infer<typeof companyPortabilityExportSchema>;

@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createCompanySchema } from "@paperclipai/shared";
 import { HttpError } from "../errors.js";
 import { errorHandler } from "../middleware/error-handler.js";
 
@@ -32,6 +33,22 @@ describe("errorHandler", () => {
   beforeEach(() => {
     recordResponsibleUserDenialOnActiveRunMock.mockReset();
     recordResponsibleUserDenialOnActiveRunMock.mockResolvedValue(null);
+  });
+
+  it("returns structured validation details for errors from shared Zod schemas", () => {
+    const result = createCompanySchema.safeParse({});
+    if (result.success) throw new Error("Expected missing company name to fail validation");
+    const res = makeRes();
+
+    errorHandler(result.error, makeReq(), res, vi.fn());
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Validation error",
+      details: expect.arrayContaining([
+        expect.objectContaining({ path: ["name"], code: "invalid_type", message: expect.any(String) }),
+      ]),
+    });
   });
 
   it("attaches the original Error to res.err for 500s", () => {

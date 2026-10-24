@@ -46,6 +46,18 @@ the deprecated callable accessor (`aui.thread().append(...)`). This API is
 fire-and-forget: the issue composer awaits the shared persistence callback
 directly so pending sends stay disabled and failed sends restore their drafts.
 
+## Zod Validation Dependencies
+
+Workspace validators and the plugin SDK use Zod 4. Use two-argument records
+(`z.record(z.string(), valueSchema)`) and `ZodError.issues`. For PATCH schemas,
+use the shared `partialWithoutDefaults` helper rather than `.partial()` when
+deriving from schemas with defaults: omitted fields must not reset stored values.
+Use `.prefault(...)` when a default input needs parsing to populate nested
+defaults. OpenAPI schemas are generated through `z.toJSONSchema` with the
+OpenAPI 3.0 target, including an explicit JSON date representation.
+Identifier validators use `z.guid()` to preserve Zod 3's acceptance of UUID-shaped
+IDs without introducing Zod 4's stricter UUID version/variant requirements.
+
 ## Dependency Lockfile Policy
 
 GitHub Actions owns `pnpm-lock.yaml`.

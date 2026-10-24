@@ -17,8 +17,8 @@ const environmentFields = {
   description: z.string().optional().nullable(),
   driver: environmentDriverSchema,
   status: environmentStatusSchema.optional().default("active"),
-  config: z.record(z.string(), z.unknown()).optional().default({}),
-  envVars: envConfigSchema.optional().default({}),
+  config: z.record(z.string(), z.unknown()).prefault({}),
+  envVars: envConfigSchema.prefault({}),
   metadata: z.record(z.string(), z.unknown()).optional().nullable(),
 };
 
@@ -40,8 +40,8 @@ export const probeEnvironmentConfigSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional().nullable(),
   driver: environmentDriverSchema,
-  config: z.record(z.string(), z.unknown()).optional().default({}),
-  envVars: envConfigSchema.optional().default({}),
+  config: z.record(z.string(), z.unknown()).prefault({}),
+  envVars: envConfigSchema.prefault({}),
   metadata: z.record(z.string(), z.unknown()).optional().nullable(),
 }).strict();
 export type ProbeEnvironmentConfig = z.infer<typeof probeEnvironmentConfigSchema>;

@@ -27,6 +27,8 @@ describe("paperclip config schema", () => {
     expect(parsed.logging.logDir).toBe("~/.paperclip/instances/default/logs");
     expect(parsed.storage.localDisk.baseDir).toBe("~/.paperclip/instances/default/data/storage");
     expect(parsed.secrets.localEncrypted.keyFilePath).toBe("~/.paperclip/instances/default/secrets/master.key");
+    expect(parsed.telemetry.enabled).toBe(true);
+    expect(parsed).not.toHaveProperty("updates");
   });
 
   it("retains extension keys at the top level and every nested config boundary", () => {

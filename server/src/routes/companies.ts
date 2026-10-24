@@ -242,9 +242,9 @@ export function companyRoutes(db: Db, storage?: StorageService) {
     from: z.string().optional(),
     to: z.string().optional(),
     userId: z.string().min(1).optional(),
-    goalId: z.string().uuid().optional(),
-    projectId: z.string().uuid().optional(),
-    issueId: z.string().uuid().optional(),
+    goalId: z.guid().optional(),
+    projectId: z.guid().optional(),
+    issueId: z.guid().optional(),
     limit: z.string().optional(),
     offset: z.string().optional(),
   }).passthrough();

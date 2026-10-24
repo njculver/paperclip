@@ -6,18 +6,18 @@ import { decisionTrainingService, logActivity } from "../services/index.js";
 import { assertBoard, assertCompanyAccess, getActorInfo, hasCompanyAccess } from "./authz.js";
 
 const sourceKindSchema = z.enum(["interaction", "approval", "execution_decision"]);
-const exampleIdSchema = z.string().uuid();
+const exampleIdSchema = z.guid();
 const createSchema = z.object({
   sourceKind: sourceKindSchema,
-  sourceId: z.string().uuid(),
-  issueId: z.string().uuid(),
+  sourceId: z.guid(),
+  issueId: z.guid(),
   notes: z.string().max(100_000).default(""),
 }).strict();
 const updateSchema = z.object({ notes: z.string().max(100_000) }).strict();
 const previewSchema = z.object({
   sourceKind: sourceKindSchema,
-  sourceId: z.string().uuid(),
-  issueId: z.string().uuid(),
+  sourceId: z.guid(),
+  issueId: z.guid(),
 }).strict();
 
 function requireHumanUser(req: Request, res: Response) {
@@ -116,7 +116,7 @@ export function decisionTrainingRoutes(db: Db) {
     assertBoard(req);
     assertCompanyAccess(req, companyId);
     const parsed = z.object({
-      project: z.string().uuid().optional(),
+      project: z.guid().optional(),
       kind: sourceKindSchema.optional(),
       author: z.string().optional(),
       q: z.string().trim().max(500).optional(),
