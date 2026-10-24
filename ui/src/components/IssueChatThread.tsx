@@ -1,7 +1,4 @@
-import {
-  AssistantRuntimeProvider,
-  useAui,
-} from "@assistant-ui/react";
+import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import type {
   ReasoningMessagePart,
   TextMessagePart,
@@ -46,7 +43,7 @@ import type {
 import type { ActiveRunForIssue, LiveRunForIssue } from "../api/heartbeats";
 import { useLiveRunTranscripts } from "./transcript/useLiveRunTranscripts";
 import { useSecondTick } from "../hooks/useSecondTick";
-import { usePaperclipIssueRuntime, type PaperclipIssueRuntimeReassignment } from "../hooks/usePaperclipIssueRuntime";
+import { usePaperclipIssueRuntime, type PaperclipIssueRuntimeReassignment, type PaperclipIssueRuntimeSendOptions } from "../hooks/usePaperclipIssueRuntime";
 import { useOptionalToastActions } from "../context/ToastContext";
 import { copyTextToClipboard } from "../lib/clipboard";
 import {
@@ -410,6 +407,7 @@ export interface IssueChatComposerHandle {
 }
 
 interface IssueChatComposerProps {
+  onSend: (options: PaperclipIssueRuntimeSendOptions) => Promise<void>;
   onImageUpload?: (file: File) => Promise<string>;
   onAttachImage?: (file: File) => Promise<IssueAttachment | void>;
   draftKey?: string;
@@ -3682,6 +3680,7 @@ function areIssueChatMessageRowPropsEqual(
 }
 
 const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerProps>(function IssueChatComposer({
+  onSend,
   onImageUpload,
   onAttachImage,
   draftKey,
@@ -3700,7 +3699,6 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
   issueWorkMode,
   onWorkModeChange,
 }, forwardedRef) {
-  const api = useAui();
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [attaching, setAttaching] = useState(false);
@@ -3813,20 +3811,15 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
       if (workModeChanged && onWorkModeChange) {
         await onWorkModeChange(pendingWorkMode);
       }
-      const appendPromise = api.thread().append({
-        role: "user",
-        content: [{ type: "text", text: submittedBody }],
-        metadata: { custom: {} },
-        attachments: [],
-        runConfig: {
-          custom: {
-            ...(reopen ? { reopen: true } : {}),
-            ...(reassignment ? { reassignment } : {}),
-          },
-        },
+      // Assistant UI's append API is fire-and-forget; await persistence here so
+      // failed sends restore the draft and pending sends keep Send disabled.
+      const sendPromise = onSend({
+        body: submittedBody,
+        reopen,
+        reassignment: reassignment ?? undefined,
       });
       queueViewportRestore(viewportSnapshot);
-      await appendPromise;
+      await sendPromise;
       if (draftKey) clearDraft(draftKey);
       setComposerAttachments([]);
       setReassignTarget(effectiveSuggestedAssigneeValue);
@@ -4633,13 +4626,15 @@ export function IssueChatThread({
     return true;
   }
 
+  const sendComment = ({ body, reopen, reassignment }: PaperclipIssueRuntimeSendOptions) => {
+    pendingSubmitScrollRef.current = true;
+    return onAdd(body, reopen, reassignment);
+  };
+
   const runtime = usePaperclipIssueRuntime({
     messages,
     isRunning,
-    onSend: ({ body, reopen, reassignment }) => {
-      pendingSubmitScrollRef.current = true;
-      return onAdd(body, reopen, reassignment);
-    },
+    onSend: sendComment,
     onCancel: onCancelRun,
   });
 
@@ -5194,6 +5189,7 @@ export function IssueChatThread({
           >
             <IssueChatComposer
               ref={composerRef}
+              onSend={sendComment}
               onImageUpload={imageUploadHandler}
               onAttachImage={onAttachImage}
               draftKey={draftKey}

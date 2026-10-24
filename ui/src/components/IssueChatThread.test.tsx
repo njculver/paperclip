@@ -53,8 +53,8 @@ const { markdownBodyRenderMock, markdownEditorFocusMock } = vi.hoisted(() => ({
   markdownEditorFocusMock: vi.fn(),
 }));
 
-const { appendMock } = vi.hoisted(() => ({
-  appendMock: vi.fn(async () => undefined),
+const { onAddMock } = vi.hoisted(() => ({
+  onAddMock: vi.fn(async () => undefined),
 }));
 
 const {
@@ -69,7 +69,6 @@ const {
 
 vi.mock("@assistant-ui/react", () => ({
   AssistantRuntimeProvider: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  useAui: () => ({ thread: () => ({ append: appendMock }) }),
 }));
 
 vi.mock("./transcript/useLiveRunTranscripts", () => ({
@@ -323,7 +322,7 @@ describe("IssueChatThread", () => {
   afterEach(() => {
     container.remove();
     vi.useRealTimers();
-    appendMock.mockReset();
+    onAddMock.mockReset();
     markdownEditorFocusMock.mockReset();
     captureComposerViewportSnapshotMock.mockClear();
     restoreComposerViewportSnapshotMock.mockClear();
@@ -3264,7 +3263,7 @@ describe("IssueChatThread", () => {
             liveRuns={[]}
             issueStatus="done"
             currentAssigneeValue="agent:agent-1"
-            onAdd={async () => {}}
+            onAdd={onAddMock}
             enableLiveTranscriptPolling={false}
           />
         </MemoryRouter>,
@@ -3293,16 +3292,7 @@ describe("IssueChatThread", () => {
       submitButton?.click();
     });
 
-    expect(appendMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        content: [{ type: "text", text: "Please pick this back up" }],
-        runConfig: {
-          custom: {
-            reopen: true,
-          },
-        },
-      }),
-    );
+    expect(onAddMock).toHaveBeenCalledWith("Please pick this back up", true, undefined);
 
     act(() => {
       root.unmount();
@@ -3320,7 +3310,7 @@ describe("IssueChatThread", () => {
             linkedRuns={[]}
             timelineEvents={[]}
             liveRuns={[]}
-            onAdd={async () => {}}
+            onAdd={onAddMock}
             enableReassign
             reassignOptions={[
               { id: "", label: "No responsible" },
@@ -3354,7 +3344,7 @@ describe("IssueChatThread", () => {
       submitButton?.click();
     });
 
-    expect(appendMock).not.toHaveBeenCalled();
+    expect(onAddMock).not.toHaveBeenCalled();
     const dialog = document.querySelector('[data-testid="issue-chat-no-assignee-dialog"]');
     expect(dialog).not.toBeNull();
     expect(dialog?.textContent).toContain("No responsible selected");
@@ -3369,12 +3359,7 @@ describe("IssueChatThread", () => {
       sendAnyway?.click();
     });
 
-    expect(appendMock).toHaveBeenCalledTimes(1);
-    expect(appendMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        content: [{ type: "text", text: "Reply without assignee" }],
-      }),
-    );
+    expect(onAddMock).toHaveBeenCalledExactlyOnceWith("Reply without assignee", undefined, undefined);
     expect(document.querySelector('[data-testid="issue-chat-no-assignee-dialog"]')).toBeNull();
 
     act(() => {
@@ -3393,7 +3378,7 @@ describe("IssueChatThread", () => {
             linkedRuns={[]}
             timelineEvents={[]}
             liveRuns={[]}
-            onAdd={async () => {}}
+            onAdd={onAddMock}
             enableReassign
             reassignOptions={[
               { id: "", label: "No responsible" },
@@ -3436,7 +3421,7 @@ describe("IssueChatThread", () => {
       goBack?.click();
     });
 
-    expect(appendMock).not.toHaveBeenCalled();
+    expect(onAddMock).not.toHaveBeenCalled();
     expect(document.querySelector('[data-testid="issue-chat-no-assignee-dialog"]')).toBeNull();
     // The composer keeps the draft so the user can pick a responsible and resend.
     const editorAfter = container.querySelector('textarea[aria-label="Issue chat editor"]') as HTMLTextAreaElement | null;
@@ -3458,7 +3443,7 @@ describe("IssueChatThread", () => {
             linkedRuns={[]}
             timelineEvents={[]}
             liveRuns={[]}
-            onAdd={async () => {}}
+            onAdd={onAddMock}
             enableReassign
             reassignOptions={[
               { id: "", label: "No responsible" },
@@ -3490,7 +3475,7 @@ describe("IssueChatThread", () => {
       submitButton?.click();
     });
 
-    expect(appendMock).toHaveBeenCalledTimes(1);
+    expect(onAddMock).toHaveBeenCalledTimes(1);
     expect(document.body.textContent).not.toContain("No responsible selected");
 
     act(() => {
@@ -3545,6 +3530,58 @@ describe("IssueChatThread", () => {
     act(() => {
       root.unmount();
     });
+  });
+
+  it.each(["", "New draft"])("keeps sends pending and restores failures without overwriting %j", async (newDraft) => {
+    let rejectSend: (error: Error) => void = () => {
+      throw new Error("Send has not started");
+    };
+    const onAdd = vi.fn(() => new Promise<void>((_resolve, reject) => {
+      rejectSend = reject;
+    }));
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <MemoryRouter>
+          <IssueChatThread
+            comments={[]}
+            onAdd={onAdd}
+            enableLiveTranscriptPolling={false}
+          />
+        </MemoryRouter>,
+      );
+    });
+    const editor = container.querySelector('textarea[aria-label="Issue chat editor"]');
+    const submitButton = Array.from(container.querySelectorAll("button"))
+      .find((element) => element.textContent === "Send");
+    if (!(editor instanceof HTMLTextAreaElement) || !submitButton) {
+      throw new Error("Expected the issue composer and Send button");
+    }
+
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set
+        ?.call(editor, "Keep this draft");
+      editor.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => submitButton.click());
+    expect(onAdd).toHaveBeenCalledExactlyOnceWith("Keep this draft", undefined, undefined);
+    expect(editor.value).toBe("");
+
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set
+        ?.call(editor, newDraft);
+      editor.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(submitButton.disabled).toBe(true);
+    await act(async () => submitButton.click());
+    expect(onAdd).toHaveBeenCalledOnce();
+
+    await act(async () => rejectSend(new Error("Comment submission failed")));
+    expect(editor.value).toBe(newDraft || "Keep this draft");
+    expect(submitButton.disabled).toBe(false);
+
+    act(() => root.unmount());
   });
 
   it("restores a cancelled queued draft into the composer handle", () => {

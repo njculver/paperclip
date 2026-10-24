@@ -36,6 +36,16 @@ and MDXEditor's supported version range. Lexical minor releases before 1.0 can
 contain breaking changes; do not independently bump them beyond that range.
 MDXEditor 4 no longer includes Sandpack; fenced code blocks use CodeMirror.
 
+## Assistant UI Dependencies
+
+The issue-chat runtime uses `@assistant-ui/react` 0.15 with its coordinated
+`@assistant-ui/core` and `@assistant-ui/store` dependencies. Keep these transitive
+packages within the React package's declared ranges rather than overriding them
+independently. Use the property-based scope API (`aui.thread.append(...)`), not
+the deprecated callable accessor (`aui.thread().append(...)`). This API is
+fire-and-forget: the issue composer awaits the shared persistence callback
+directly so pending sends stay disabled and failed sends restore their drafts.
+
 ## Dependency Lockfile Policy
 
 GitHub Actions owns `pnpm-lock.yaml`.
