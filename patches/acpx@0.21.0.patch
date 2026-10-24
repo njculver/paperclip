@@ -1,0 +1,66 @@
+--- a/dist/agent-registry-Gtwn7nMp.js
++++ b/dist/agent-registry-Gtwn7nMp.js
+@@ -141,7 +141,7 @@
+ 		state.current += ch;
+ 		state.escaping = false;
+ 		state.hasPart = true;
+-	} else if (ch === "\\" && state.quote !== "'") state.escaping = true;
++	} else if (process.platform !== "win32" && ch === "\\" && state.quote !== "'") state.escaping = true;
+ 	else if (state.quote) {
+ 		if (ch === state.quote) state.quote = null;
+ 		else state.current += ch;
+--- a/dist/queue-owner-runtime-CNrWkR8J.js
++++ b/dist/queue-owner-runtime-CNrWkR8J.js
+@@ -2766,6 +2766,10 @@
+ 		const startupStderr = [];
+ 		child.stderr.on("data", (chunk) => {
+ 			this.captureStartupStderr(startupStderr, chunk);
++			if (this.options.onAgentStderr) {
++				this.options.onAgentStderr(chunk.toString());
++				return;
++			}
+ 			if (!this.options.verbose) return;
+ 			process.stderr.write(chunk);
+ 		});
+@@ -2818,7 +2822,7 @@
+ 		const configuredCommand = resolveAgentCommandParts(this.options.agentCommand, this.options.agentArgv);
+ 		const resolvedBuiltInLaunch = resolveBuiltInAgentLaunch(this.options.agentCommand);
+ 		const spawnCommand = resolvedBuiltInLaunch?.command ?? configuredCommand.command;
+-		const spawnOptions = buildAgentSpawnOptions(this.options.cwd, this.options.authCredentials, this.options.sessionOptions?.env, this.options.agentProcessEnv, this.inheritedEnvPolicy());
++		const spawnOptions = buildAgentSpawnOptions(this.options.spawnCwd ?? this.options.cwd, this.options.authCredentials, this.options.sessionOptions?.env, this.options.agentProcessEnv, this.inheritedEnvPolicy());
+ 		const commandContext = {
+ 			env: spawnOptions.env,
+ 			readOutput: async (command, args, timeoutMs, diagnostic = false) => {
+--- a/dist/runtime.js
++++ b/dist/runtime.js
+@@ -1016,6 +1016,8 @@
+ 		this.assertOpen();
+ 		const clientOptions = {
+ 			...options,
++			onAgentStderr: this.options.onAgentStderr,
++			spawnCwd: this.options.spawnCwd,
+ 			agentProcessEnv: this.options.agentProcessEnv,
+ 			agentProcessEnvAllow: this.options.agentProcessEnvAllow,
+ 			agentProcessEnvBlock: this.options.agentProcessEnvBlock,
+--- a/dist/runtime.d.ts
++++ b/dist/runtime.d.ts
+@@ -441,6 +441,8 @@
+   timeoutMs?: number;
+   probeAgent?: string;
+   verbose?: boolean;
++  onAgentStderr?: (chunk: string) => void;
++  spawnCwd?: string;
+   /** ACP elicitation modes the embedding host can render for prompt turns. */
+   elicitationModes?: readonly AcpElicitationMode[];
+   /** Optional lifecycle observer for ACP agent processes owned by this runtime. */
+--- a/dist/session-options-DVr_JUL7.d.ts
++++ b/dist/session-options-DVr_JUL7.d.ts
+@@ -166,6 +166,8 @@
+   processLaunchScope?: AcpProcessLaunchScope;
+   suppressSdkConsoleErrors?: boolean;
+   verbose?: boolean;
++  onAgentStderr?: (chunk: string) => void;
++  spawnCwd?: string;
+   sessionOptions?: {
+     model?: string;
+     allowedTools?: string[];

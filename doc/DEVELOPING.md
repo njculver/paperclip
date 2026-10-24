@@ -67,6 +67,16 @@ OpenAPI 3.0 target, including an explicit JSON date representation.
 Identifier validators use `z.guid()` to preserve Zod 3's acceptance of UUID-shaped
 IDs without introducing Zod 4's stricter UUID version/variant requirements.
 
+## ACP Runtime Dependency
+
+The shared ACP engine pins `acpx` 0.21.0 and bundles its patched runtime for npm
+distribution. The patch retains child stderr routing, the host-only `spawnCwd`
+override for remote relay processes, and Windows command-path handling.
+Environment-map key preservation is now provided upstream. Process identity
+persistence uses upstream `processLifecycle.onSpawned`, which aborts startup and
+terminates the child if persistence rejects. Rebase the patch and run the real
+spawn smoke tests and packaging tests whenever upgrading `acpx`.
+
 ## Dependency Lockfile Policy
 
 GitHub Actions owns `pnpm-lock.yaml`.

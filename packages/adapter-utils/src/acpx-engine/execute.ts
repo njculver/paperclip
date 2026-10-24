@@ -139,7 +139,6 @@ function flushChildStderr(state: ChildStderrState) {
 type AcpxAgentProcessIdentity = { pid: number; startedAt: string };
 
 type PaperclipAcpRuntimeOptions = AcpRuntimeOptions & {
-  onAgentSpawn?: (meta: AcpxAgentProcessIdentity) => Promise<void>;
   // Return the current-run parent-context token. It is the `task.run` token
   // during startup and after the turn, and the `agent.turn` token during the
   // turn. A detached exec reads this getter to parent to the live run span. The
@@ -3301,19 +3300,21 @@ export function createAcpxEngineExecutor(deps: AcpxEngineExecutorOptions = {}) {
         onAgentStderr: prepared.childStderrLogPath
           ? (chunk) => routeChildStderr(childStderrState, chunk)
           : undefined,
-        onAgentSpawn: async (meta) => {
-          processIdentitySink.latest = meta;
-          await processIdentitySink.current?.({
-            pid: meta.pid,
-            processGroupId: null,
-            startedAt: meta.startedAt,
-          });
+        processLifecycle: {
+          onSpawned: async (meta) => {
+            processIdentitySink.latest = { pid: meta.pid, startedAt: meta.startedAt };
+            await processIdentitySink.current?.({
+              pid: meta.pid,
+              processGroupId: null,
+              startedAt: meta.startedAt,
+            });
+          },
         },
         getRuntimeParentContext,
       };
       // Open Q2: split the ~7s `acp.handshake` into the two in-repo-observable
       // sub-phases — the ACP runtime construction (`createRuntime`) vs the session
-      // establishment envelope (`ensureSession`). The patched spawn lifecycle
+      // establishment envelope (`ensureSession`). The upstream spawn lifecycle
       // hook records process identity, but the finer spawn/`initialize`/
       // `session/new` timing split still lives inside external `acpx`.
       // `createRuntime` runs once and only on a cold start; a warm-handle hit

@@ -34,10 +34,10 @@ const buildNpmScript = await readFile(new URL("./build-npm.sh", import.meta.url)
 
 test("published packages preserve the patched ACPX runtime", () => {
   assert.equal(
-    rootPackage.pnpm.patchedDependencies["acpx@0.12.0"],
-    "patches/acpx@0.12.0.patch",
+    rootPackage.pnpm.patchedDependencies["acpx@0.21.0"],
+    "patches/acpx@0.21.0.patch",
   );
-  assert.equal(adapterUtilsPackage.dependencies.acpx, "0.12.0");
+  assert.equal(adapterUtilsPackage.dependencies.acpx, "0.21.0");
   assert.deepEqual(adapterUtilsPackage.bundleDependencies, ["acpx"]);
   assert.equal(bundledCliNpmDependencies.has("acpx"), true);
   assert.equal(cliEsbuildConfig.external.includes("acpx"), false);
