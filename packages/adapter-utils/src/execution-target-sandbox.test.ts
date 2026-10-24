@@ -128,7 +128,7 @@ describe("sandbox adapter execution targets", () => {
         clearTimeout(timeout);
         reject(error);
       });
-      child.on("exit", (exitCode) => {
+      child.on("close", (exitCode) => {
         clearTimeout(timeout);
         resolve(exitCode);
       });
@@ -945,6 +945,62 @@ describe("sandbox adapter execution targets", () => {
         expect(result.code).toBe(0);
         expect(result.stdout).toBe("out:hello\n");
         expect(result.stderr).toBe("err:hello\n");
+      } finally {
+        await bridge?.stop();
+      }
+    });
+
+    it.each([false, true])("orders stdin uploads before EOF with streamed output %s", async (streamOutputViaSession) => {
+      const rootDir = await mkdtemp(path.join(os.tmpdir(), "paperclip-process-session-stdin-order-"));
+      cleanupDirs.push(rootDir);
+      const childPath = path.join(rootDir, "echo-child.mjs");
+      await writeFile(childPath, "process.stdin.on('data', chunk => process.stdout.write(chunk));\n");
+      const delegate = createLocalSandboxRunner();
+      const completedUploads: string[] = [];
+      const runner = {
+        execute: async (input: Parameters<typeof delegate.execute>[0]) => {
+          const script = (input.args ?? []).join("\n");
+          const sequence = script.match(/\/stdin\/(0+\d+)\.json/)?.[1];
+          // Force EOF to overtake the data unless the bridge serializes uploads.
+          if (sequence === "000000000001") {
+            await new Promise((resolve) => setTimeout(resolve, 150));
+          }
+          // Hold the decoded file empty long enough for the reader to poll it.
+          // Only an atomic rename should expose it as a consumable JSON message.
+          const args = sequence
+            ? input.args?.map((arg) => arg.replace(
+                /(base64 -d < '[^']+' > )('[^']+')/,
+                ": > $2; sleep 0.15; $1$2",
+              ))
+            : input.args;
+          const result = await delegate.execute({ ...input, args });
+          if (sequence && script.includes("base64 -d")) completedUploads.push(sequence);
+          return result;
+        },
+      };
+      const bridge = await startAdapterExecutionTargetProcessSessionBridge({
+        runId: "run-stdin-order",
+        target: {
+          kind: "remote",
+          transport: "sandbox",
+          providerKey: "local-test",
+          remoteCwd: rootDir,
+          runner,
+        },
+        runtimeRootDir: path.join(rootDir, "runtime"),
+        adapterKey: "acpx",
+        command: process.execPath,
+        args: [childPath],
+        cwd: rootDir,
+        env: {},
+        timeoutSec: 5,
+        streamOutputViaSession,
+      });
+      expect(bridge).not.toBeNull();
+      try {
+        const result = await runProxyWithInput(bridge!.agentCommand, "hello\n");
+        expect(result).toEqual({ code: 0, stdout: "hello\n", stderr: "" });
+        expect(completedUploads).toEqual(["000000000001", "000000000002"]);
       } finally {
         await bridge?.stop();
       }

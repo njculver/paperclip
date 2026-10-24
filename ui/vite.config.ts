@@ -10,15 +10,19 @@ const apiProxy = createApiProxy();
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
   build: {
-    minify: "esbuild",
+    minify: "oxc",
+    rolldownOptions: {
+      output: {
+        minify:
+          mode === "production"
+            ? {
+                compress: { dropConsole: true, dropDebugger: true },
+                codegen: { legalComments: "none" },
+              }
+            : true,
+      },
+    },
   },
-  esbuild:
-    mode === "production"
-      ? {
-          drop: ["console", "debugger"],
-          legalComments: "none",
-        }
-      : undefined,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

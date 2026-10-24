@@ -70,18 +70,18 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.5.4",
-    "@storybook/addon-docs": "10.5.0",
-    "@storybook/react-vite": "10.5.0",
+    "@storybook/addon-a11y": "10.6.3",
+    "@storybook/addon-docs": "10.6.3",
+    "@storybook/react-vite": "10.6.3",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "storybook": "10.5.5",
+    "@vitejs/plugin-react": "^6.1.2",
+    "storybook": "10.6.3",
     "tailwindcss": "^4.3.2",
     "typescript": "^5.7.3",
-    "vite": "^6.1.0",
-    "vitest": "^4.1.10"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   }
 }

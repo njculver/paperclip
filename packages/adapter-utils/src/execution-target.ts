@@ -1515,6 +1515,7 @@ export async function startAdapterExecutionTargetProcessSessionBridge(input: {
   let socket: net.Socket | null = null;
   let stopping = false;
   let stdinSeq = 0;
+  let stdinWrites = Promise.resolve();
   let pollTimer: NodeJS.Timeout | null = null;
   const pendingRemoteEvents: Array<{
     type?: string;
@@ -1526,6 +1527,12 @@ export async function startAdapterExecutionTargetProcessSessionBridge(input: {
   }> = [];
   const token = createSandboxCallbackBridgeToken(18);
   const proxyDir = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-process-session-proxy-"));
+
+  const writeStdinMessage = async (name: string, body: string) => {
+    const file = path.posix.join(stdinDir, name);
+    await client.writeTextFile(`${file}.tmp`, body);
+    await client.rename(`${file}.tmp`, file);
+  };
 
   const writeRemoteEventToSocket = (event: (typeof pendingRemoteEvents)[number]) => {
     if (!socket) return false;
@@ -1625,11 +1632,17 @@ export async function startAdapterExecutionTargetProcessSessionBridge(input: {
         if (stdinPayload) {
           stdinSeq += 1;
           const name = `${String(stdinSeq).padStart(12, "0")}.json`;
-          void runRuntimeWork(AGENT_SESSION_SEND_INPUT_SPAN, () =>
-            client.writeTextFile(path.posix.join(stdinDir, name), jsonLine(stdinPayload)),
-          ).catch((error) => {
-            nextSocket.write(jsonLine({ type: "error", message: error instanceof Error ? error.message : String(error) }));
-            nextSocket.destroy();
+          const previousWrite = stdinWrites;
+          // Capture the send-time span now, but publish messages in order so EOF
+          // cannot overtake data on providers that execute uploads concurrently.
+          stdinWrites = runRuntimeWork(AGENT_SESSION_SEND_INPUT_SPAN, async () => {
+            await previousWrite;
+            await writeStdinMessage(name, jsonLine(stdinPayload));
+          });
+          void stdinWrites.catch((error) => {
+            if (!nextSocket.writableEnded) {
+              nextSocket.end(jsonLine({ type: "error", message: error instanceof Error ? error.message : String(error) }));
+            }
           });
         }
       }
@@ -1786,8 +1799,9 @@ export async function startAdapterExecutionTargetProcessSessionBridge(input: {
       if (pollTimer) clearTimeout(pollTimer);
       for (const liveSocket of liveSockets) liveSocket.destroy();
       await new Promise<void>((resolve) => server.close(() => resolve())).catch(() => undefined);
-      await client.writeTextFile(
-        path.posix.join(stdinDir, `${String(stdinSeq + 1).padStart(12, "0")}.json`),
+      await stdinWrites.catch(() => undefined);
+      await writeStdinMessage(
+        `${String(stdinSeq + 1).padStart(12, "0")}.json`,
         jsonLine({ type: "stdinEnd" }),
       ).catch(() => undefined);
       await client.remove(sessionDir).catch(() => undefined);

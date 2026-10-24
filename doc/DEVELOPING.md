@@ -12,8 +12,21 @@ Current implementation status:
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 24 LTS (Node.js 26+ is also supported for development)
 - pnpm 9+
+
+The workspace toolchain uses Vite 8, Vitest 5, and Storybook 10.6. CI uses Node.js
+24. Production UI builds use Oxc minification and remove console calls and
+debugger statements; development builds retain console logging.
+Server suites run sequentially through `server/vitest.config.ts`; use ordinary
+`describe` and `it` calls rather than the removed Vitest `.sequential` aliases.
+The stable test runner sets `TZ=UTC` for deterministic date assertions and uses
+canonical temporary paths to avoid macOS `/tmp` symlink differences.
+Database, adapter-utils, and Claude/Codex/OpenClaw/OpenCode adapter projects run
+tests from source only, not compiled copies under `dist`.
+Local-process filesystem/network sandbox tests require Linux; parsing and
+unsupported-platform checks still run on macOS. The optional Claude MCP isolation
+integration requires a local Claude Code 2.1.207+ CLI in the 2.1 release line.
 
 ## Dependency Lockfile Policy
 
@@ -44,6 +57,11 @@ This starts:
 `pnpm dev` and `pnpm dev:once` are now idempotent for the current repo and instance: if the matching Paperclip dev runner is already alive, Paperclip reports the existing process instead of starting a duplicate.
 
 Issue execution may also use project execution workspace policies and workspace runtime services for per-project worktrees, preview servers, and managed dev commands. Configure those through the project workspace/runtime surfaces rather than starting long-running unmanaged processes when a task needs a reusable service.
+
+Local runtime-service adoption checks process working directories through `/proc`
+on Linux and `lsof` on macOS. Keep `lsof` available on macOS for service discovery
+after registry loss; port-owner adoption rejects processes whose working directory
+cannot be verified inside the requested workspace.
 
 ### Mobile-friendly preview (`pnpm dev:mobile`)
 

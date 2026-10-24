@@ -195,7 +195,7 @@ async function createApp(actor: Record<string, unknown> = {
   return app;
 }
 
-describe.sequential("issue thread interaction routes", () => {
+describe("issue thread interaction routes", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.doUnmock("../routes/issues.js");

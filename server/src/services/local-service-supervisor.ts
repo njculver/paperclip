@@ -419,9 +419,18 @@ export async function readLocalServicePortOwner(port: number) {
 }
 
 export async function readLocalServiceProcessCwd(pid: number) {
-  if (!Number.isInteger(pid) || pid <= 0 || process.platform !== "linux") return null;
+  if (!Number.isInteger(pid) || pid <= 0) return null;
   try {
-    return await fs.readlink(`/proc/${pid}/cwd`);
+    if (process.platform === "linux") {
+      return await fs.readlink(`/proc/${pid}/cwd`);
+    }
+    if (process.platform === "darwin") {
+      const { stdout } = await execFileAsync("lsof", ["-a", "-p", String(pid), "-d", "cwd", "-Fn0"]);
+      const nameField = stdout.split("\0").find((field) => field.startsWith("n"));
+      const cwd = nameField?.slice(1);
+      return cwd && path.isAbsolute(cwd) ? cwd : null;
+    }
+    return null;
   } catch {
     return null;
   }

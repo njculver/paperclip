@@ -164,8 +164,8 @@ describe("git workspace sync", () => {
       await git(cloneDir, ["remote", "add", "origin", upstream]);
       await git(cloneDir, ["push", "origin", "HEAD:refs/heads/sandbox-change"]);
 
-      expect(await git(upstream, ["rev-parse", "refs/heads/sandbox-change"])).toBe(cloneHead);
-      expect(await git(upstream, ["merge-base", "refs/heads/main", "refs/heads/sandbox-change"])).toBe(baseHead);
+      expect(await git(upstream, ["--git-dir", upstream, "rev-parse", "refs/heads/sandbox-change"])).toBe(cloneHead);
+      expect(await git(upstream, ["--git-dir", upstream, "merge-base", "refs/heads/main", "refs/heads/sandbox-change"])).toBe(baseHead);
     });
   });
 

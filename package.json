@@ -73,10 +73,10 @@
     "cross-env": "^10.1.0",
     "esbuild": "^0.28.1",
     "typescript": "^5.7.3",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.5"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^24.0.0 || >=26.0.0"
   },
   "packageManager": "pnpm@9.15.4",
   "pnpm": {

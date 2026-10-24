@@ -341,7 +341,7 @@ function resetMockDefaults() {
   mockLogActivity.mockImplementation(async () => undefined);
 }
 
-describe.sequential("agent cross-tenant route authorization", () => {
+describe("agent cross-tenant route authorization", () => {
   beforeEach(() => {
     resetMockDefaults();
   });
