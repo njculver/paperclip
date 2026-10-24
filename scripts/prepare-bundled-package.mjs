@@ -113,17 +113,6 @@ export function prepareBundledPackage(sourceDir, destinationDir) {
   }
 
   if (bundledDependencies.includes("embedded-postgres")) {
-    const embeddedPostgresSource = readFileSync(
-      resolve(destinationDir, "node_modules/embedded-postgres/dist/index.js"),
-      "utf8",
-    );
-    if (
-      !embeddedPostgresSource.includes("const LC_MESSAGES_LOCALE = 'C';") ||
-      !embeddedPostgresSource.includes("globalThis.process.env")
-    ) {
-      throw new Error("staged embedded-postgres runtime is missing the repository patch");
-    }
-
     const embeddedPostgresPackage = JSON.parse(
       readFileSync(resolve(destinationDir, "node_modules/embedded-postgres/package.json"), "utf8"),
     );

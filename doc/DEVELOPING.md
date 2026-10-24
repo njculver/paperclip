@@ -77,6 +77,16 @@ persistence uses upstream `processLifecycle.onSpawned`, which aborts startup and
 terminates the child if persistence rejects. Rebase the patch and run the real
 spawn smoke tests and packaging tests whenever upgrading `acpx`.
 
+## Embedded PostgreSQL Dependency
+
+The database package, server, and CLI pin `embedded-postgres` 18.4.0-beta.17.
+This release supplies PostgreSQL 18.4 and handles portable locale selection and
+child-process environment inheritance upstream, replacing the former local
+patch. npm distributions still bundle the JavaScript runtime and declare its
+platform-native packages as optional dependencies. Verify real database startup,
+migrations, and bundled staging when upgrading; do not replace or reset existing
+local database directories as part of a dependency upgrade.
+
 ## Dependency Lockfile Policy
 
 GitHub Actions owns `pnpm-lock.yaml`.

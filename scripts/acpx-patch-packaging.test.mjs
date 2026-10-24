@@ -43,11 +43,11 @@ test("published packages preserve the patched ACPX runtime", () => {
   assert.equal(cliEsbuildConfig.external.includes("acpx"), false);
 });
 
-test("published packages preserve the patched embedded-postgres runtime", () => {
-  assert.equal(
-    rootPackage.pnpm.patchedDependencies["embedded-postgres@18.1.0-beta.16"],
-    "patches/embedded-postgres@18.1.0-beta.16.patch",
-  );
+test("published packages bundle upstream embedded-postgres without an obsolete patch", () => {
+  assert.equal(Object.keys(rootPackage.pnpm.patchedDependencies).some(
+    (specifier) => specifier.startsWith("embedded-postgres@"),
+  ), false);
+  assert.equal(dbPackage.dependencies["embedded-postgres"], "18.4.0-beta.17");
   assert.deepEqual(dbPackage.bundleDependencies, ["embedded-postgres"]);
   assert.equal(bundledCliNpmDependencies.has("embedded-postgres"), true);
   assert.equal(cliEsbuildConfig.external.includes("embedded-postgres"), false);
@@ -84,7 +84,7 @@ test("bundled package staging installs only dependencies included in the tarball
       dependencies: {
         "@paperclipai/shared": "2026.723.0-canary.8",
         "drizzle-orm": "^0.45.2",
-        "embedded-postgres": "^18.1.0-beta.16",
+        "embedded-postgres": "18.4.0-beta.17",
       },
       bundleDependencies: ["embedded-postgres"],
     },
@@ -92,7 +92,7 @@ test("bundled package staging installs only dependencies included in the tarball
   );
 
   assert.deepEqual(installManifest.dependencies, {
-    "embedded-postgres": "^18.1.0-beta.16",
+    "embedded-postgres": "18.4.0-beta.17",
   });
   assert.deepEqual(installManifest.bundleDependencies, ["embedded-postgres"]);
 });

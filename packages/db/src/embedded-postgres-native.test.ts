@@ -2,11 +2,8 @@ import childProcess from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createRequire } from "node:module";
 import { afterEach, describe, expect, it } from "vitest";
 import { ensureLinuxSharedLibraryAliases, prepareEmbeddedPostgresNativeRuntime } from "./embedded-postgres-native.js";
-
-const require = createRequire(import.meta.url);
 
 describe("embedded Postgres native runtime", () => {
   const tempDirs: string[] = [];
@@ -51,12 +48,5 @@ describe("embedded Postgres native runtime", () => {
     await prepareEmbeddedPostgresNativeRuntime();
 
     expect(childProcess.spawn).toBe(originalSpawn);
-  });
-
-  it("uses the dependency-scoped portable locale patch", () => {
-    const source = fs.readFileSync(require.resolve("embedded-postgres"), "utf8");
-
-    expect(source).toContain("const LC_MESSAGES_LOCALE = 'C';");
-    expect(source).toContain("globalThis.process.env");
   });
 });
