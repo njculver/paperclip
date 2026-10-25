@@ -29,11 +29,11 @@ import {
   Check,
   ChevronRight,
   Download,
-  Github,
   Loader2,
   Package,
   Upload,
 } from "lucide-react";
+import { Github } from "../components/GithubIcon";
 import { Field, adapterLabels } from "../components/agent-config-primitives";
 import { getAdapterLabel } from "../adapters/adapter-display-registry";
 import { defaultCreateValues } from "../components/agent-config-defaults";

@@ -12,7 +12,7 @@ Current implementation status:
 
 ## Prerequisites
 
-- Node.js 24 LTS (Node.js 26+ is also supported for development)
+- Node.js 24.15+ LTS (Node.js 26+ is also supported for development)
 - pnpm 9+
 
 The workspace toolchain uses Vite 8, Vitest 5, and Storybook 10.6. CI uses Node.js

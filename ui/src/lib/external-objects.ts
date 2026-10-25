@@ -9,13 +9,13 @@ import {
   Clock,
   CloudOff,
   GitMerge,
-  Github,
   GitPullRequest,
   KeyRound,
   Loader2,
   XCircle,
   type LucideIcon,
 } from "lucide-react";
+import { Github } from "../components/GithubIcon";
 import type {
   ExternalObjectLivenessState,
   ExternalObjectStatusCategory,

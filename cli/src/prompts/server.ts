@@ -55,7 +55,8 @@ export async function promptServer(opts?: {
     defaultValue: String(currentServer?.port ?? 3100),
     placeholder: "3100",
     validate: (val) => {
-      const n = Number(val);
+      const candidate = val ?? "";
+      const n = Number(candidate);
       if (isNaN(n) || n < 1 || n > 65535 || !Number.isInteger(n)) {
         return "Must be an integer between 1 and 65535";
       }
@@ -84,7 +85,7 @@ export async function promptServer(opts?: {
           : "dotta-macbook-pro, host.docker.internal",
       validate: (val) => {
         try {
-          parseHostnameCsv(val);
+          parseHostnameCsv(val ?? "");
           return;
         } catch (err) {
           return err instanceof Error ? err.message : "Invalid hostname list";
@@ -156,8 +157,9 @@ export async function promptServer(opts?: {
     defaultValue: defaultHost,
     placeholder: defaultHost,
     validate: (val) => {
-      if (!val.trim()) return "Host is required";
-      if (deploymentMode === "local_trusted" && !isLoopbackHost(val.trim())) {
+      const candidate = val ?? "";
+      if (!candidate.trim()) return "Host is required";
+      if (deploymentMode === "local_trusted" && !isLoopbackHost(candidate.trim())) {
         return "Local trusted mode requires a loopback host such as 127.0.0.1";
       }
     },
@@ -173,7 +175,7 @@ export async function promptServer(opts?: {
       placeholder: "dotta-macbook-pro, your-host.tailnet.ts.net",
       validate: (val) => {
         try {
-          parseHostnameCsv(val);
+          parseHostnameCsv(val ?? "");
           return;
         } catch (err) {
           return err instanceof Error ? err.message : "Invalid hostname list";
@@ -192,7 +194,7 @@ export async function promptServer(opts?: {
       defaultValue: currentAuth?.publicBaseUrl ?? "",
       placeholder: "https://paperclip.example.com",
       validate: (val) => {
-        const candidate = val.trim();
+        const candidate = (val ?? "").trim();
         if (!candidate) return "Public base URL is required for public exposure";
         try {
           const url = new URL(candidate);
