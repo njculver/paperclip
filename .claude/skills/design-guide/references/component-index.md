@@ -52,6 +52,16 @@ These are shadcn/ui base components. Do not modify directly — extend via compo
 
 Location: `ui/src/components/`
 
+### GithubIcon
+
+**File:** `GithubIcon.tsx`
+**Props:** Standard Lucide icon props.
+**Usage:** GitHub brand glyph for links and source-provider metadata. Kept locally because Lucide React 1 no longer exports the GitHub icon.
+
+```tsx
+<Github aria-label="GitHub" className="size-4" />
+```
+
 ### StatusBadge
 
 **File:** `StatusBadge.tsx`

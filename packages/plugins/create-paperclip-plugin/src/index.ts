@@ -195,11 +195,11 @@ export function scaffoldPluginProject(options: ScaffoldPluginOptions): string {
         : {}),
       "@paperclipai/plugin-sdk": sdkDependency,
       "@rollup/plugin-node-resolve": "^16.0.1",
-      "@rollup/plugin-typescript": "^12.1.2",
+      "@rollup/plugin-typescript": "^12.3.1",
       "@types/node": "^24.19.2",
       "@types/react": "^19.3.0",
       esbuild: "^0.28.2",
-      rollup: "^4.38.0",
+      rollup: "^4.65.0",
       tslib: "^2.8.1",
       typescript: "^6.0.3",
       vitest: "^3.0.5"
