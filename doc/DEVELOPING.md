@@ -87,6 +87,17 @@ persistence uses upstream `processLifecycle.onSpawned`, which aborts startup and
 terminates the child if persistence rejects. Rebase the patch and run the real
 spawn smoke tests and packaging tests whenever upgrading `acpx`.
 
+Claude and Codex adapters use `@agentclientprotocol/claude-agent-acp` 0.95.0
+and `@agentclientprotocol/codex-acp` 2.2.2. The Claude adapter explicitly
+installs Anthropic SDK 1.3.0 to satisfy the bundled Claude Agent SDK's runtime
+peer requirement rather than retaining the unsupported 0.81 resolution.
+Each ACP adapter supplies its own protocol SDK; do not force those SDKs to
+the same major. Both still negotiate ACP v1 with the shared acpx runtime.
+Run `pnpm test:acp-adapters` to exercise the actual packaged processes with
+isolated config directories and no account credentials or model requests.
+The Codex handshake also starts its bundled native app server; verify it on
+each supported release platform.
+
 ## Embedded PostgreSQL Dependency
 
 The database package, server, and CLI pin `embedded-postgres` 18.4.0-beta.17.
