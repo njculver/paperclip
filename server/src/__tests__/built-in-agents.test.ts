@@ -173,7 +173,7 @@ describeEmbeddedPostgres("built-in agents", () => {
     const summarizer = definitions.find((definition) => definition.key === "summarizer");
     expect(summarizer).toMatchObject({
       defaultAdapterType: "claude_local",
-      defaultAdapterConfig: { model: "claude-haiku-4-5" },
+      defaultAdapterConfig: { model: "claude-haiku-5-5" },
     });
     expect(summarizer?.defaultRuntimeConfig).toBeUndefined();
     expect(() => validateBuiltInAgentDefinitions([
@@ -480,7 +480,7 @@ describeEmbeddedPostgres("built-in agents", () => {
 
     const ready = await builtIns.ensure(companyId, "learning", {
       adapterType: "claude_local",
-      adapterConfig: { model: "claude-sonnet-4-5" },
+      adapterConfig: { model: "claude-sonnet-5-5" },
     });
     expect(ready.status).toBe("ready");
 
@@ -1179,7 +1179,7 @@ describeEmbeddedPostgres("built-in agents", () => {
       role: "general",
       reportsTo: root.id,
       adapterType: "claude_local",
-      adapterConfig: { model: "claude-haiku-4-5" },
+      adapterConfig: { model: "claude-haiku-5-5" },
       budgetMonthlyCents: 0,
     });
     expect(state.status).toBe("paused");
