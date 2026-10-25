@@ -136,7 +136,6 @@ import {
   FolderOpen,
   FolderSearch,
   GitFork,
-  Github,
   Globe,
   HelpCircle,
   LayoutGrid,
@@ -164,6 +163,7 @@ import {
   X,
   XOctagon,
 } from "lucide-react";
+import { Github } from "../components/GithubIcon";
 import type { FolderListItem, FolderListResult } from "@paperclipai/shared";
 
 type SkillTreeNode = {

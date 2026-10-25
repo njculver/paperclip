@@ -278,7 +278,7 @@ async function requestApp(
   }
 }
 
-describe.sequential("agent permission routes", () => {
+describe("agent permission routes", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.doUnmock("@paperclipai/shared/telemetry");

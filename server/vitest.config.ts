@@ -15,7 +15,6 @@ export default defineConfig({
     isolate: true,
     maxConcurrency: 1,
     maxWorkers: 1,
-    minWorkers: 1,
     pool: "forks",
     sequence: {
       concurrent: false,

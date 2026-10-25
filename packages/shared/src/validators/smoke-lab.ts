@@ -13,7 +13,7 @@ export const smokeRunStepStatusSchema = z.enum(SMOKE_RUN_STEP_STATUSES);
 
 export const createSmokeRunSchema = z.object({
   trigger: smokeRunTriggerSchema.default("manual"),
-  summary: z.record(z.string(), z.unknown()).default({}),
+  summary: z.record(z.string(), z.unknown()).prefault({}),
 }).strict();
 
 export const updateSmokeRunSchema = z.object({

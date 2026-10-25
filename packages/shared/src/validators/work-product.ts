@@ -1,3 +1,4 @@
+import { partialWithoutDefaults } from "./partial.js";
 import { z } from "zod";
 import { workspaceFileRefSchema } from "./workspace-file-resource.js";
 
@@ -35,7 +36,7 @@ export const issueWorkProductReviewStateSchema = z.enum([
 ]);
 
 export const attachmentArtifactWorkProductMetadataSchema = z.object({
-  attachmentId: z.string().uuid(),
+  attachmentId: z.guid(),
   contentType: z.string().min(1),
   byteSize: z.number().int().nonnegative(),
   contentPath: z.string().min(1),
@@ -78,9 +79,9 @@ export const issueWorkProductMetadataSchema = z
 export type IssueWorkProductMetadata = z.infer<typeof issueWorkProductMetadataSchema>;
 
 export const createIssueWorkProductSchema = z.object({
-  projectId: z.string().uuid().optional().nullable(),
-  executionWorkspaceId: z.string().uuid().optional().nullable(),
-  runtimeServiceId: z.string().uuid().optional().nullable(),
+  projectId: z.guid().optional().nullable(),
+  executionWorkspaceId: z.guid().optional().nullable(),
+  runtimeServiceId: z.guid().optional().nullable(),
   type: issueWorkProductTypeSchema,
   provider: z.string().min(1),
   externalId: z.string().optional().nullable(),
@@ -92,11 +93,11 @@ export const createIssueWorkProductSchema = z.object({
   healthStatus: z.enum(["unknown", "healthy", "unhealthy"]).optional().default("unknown"),
   summary: z.string().optional().nullable(),
   metadata: issueWorkProductMetadataSchema.optional().nullable(),
-  createdByRunId: z.string().uuid().optional().nullable(),
+  createdByRunId: z.guid().optional().nullable(),
 });
 
 export type CreateIssueWorkProduct = z.infer<typeof createIssueWorkProductSchema>;
 
-export const updateIssueWorkProductSchema = createIssueWorkProductSchema.partial();
+export const updateIssueWorkProductSchema = partialWithoutDefaults(createIssueWorkProductSchema);
 
 export type UpdateIssueWorkProduct = z.infer<typeof updateIssueWorkProductSchema>;

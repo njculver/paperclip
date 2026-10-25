@@ -101,11 +101,11 @@ export const secretsConfigSchema = z.object({
 
 export const telemetryConfigSchema = z.object({
   enabled: z.boolean().default(true),
-}).passthrough().default({});
+}).passthrough().prefault({});
 
 export const updatesConfigSchema = z.object({
   checkEnabled: z.boolean().default(true),
-}).passthrough().default({});
+}).passthrough().prefault({});
 
 export const paperclipConfigSchema = z
   .object({
@@ -115,7 +115,7 @@ export const paperclipConfigSchema = z
     logging: loggingConfigSchema,
     server: serverConfigSchema,
     telemetry: telemetryConfigSchema,
-    updates: updatesConfigSchema.optional(),
+    updates: updatesConfigSchema.unwrap().optional(),
     auth: authConfigSchema.default({
       baseUrlMode: "auto",
       disableSignUp: false,
@@ -209,19 +209,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function unwrapConfigSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
+function unwrapConfigSchema(schema: z.core.$ZodType): z.core.$ZodType {
   let current = schema;
   while (true) {
-    if (current instanceof z.ZodEffects) {
-      current = current.innerType();
-      continue;
-    }
     if (current instanceof z.ZodOptional) {
       current = current.unwrap();
       continue;
     }
-    if (current instanceof z.ZodDefault) {
-      current = current.removeDefault();
+    if (current instanceof z.ZodDefault || current instanceof z.ZodPrefault) {
+      current = current.unwrap();
       continue;
     }
     return current;

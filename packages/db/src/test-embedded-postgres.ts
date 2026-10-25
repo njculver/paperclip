@@ -136,7 +136,7 @@ function cleanupEmbeddedPostgresTestDirs(dataDir: string) {
 // stop gracefully before abandoning the wait and returning from the hook.
 const EMBEDDED_POSTGRES_STOP_TIMEOUT_MS = 5000;
 
-// `embedded-postgres@18.1.0-beta.16` exposes only `stop(): Promise<void>` — no
+// `embedded-postgres@18.4.0-beta.17` exposes only `stop(): Promise<void>` — no
 // shutdown-mode argument. Internally it SIGINTs the postgres process (already
 // PostgreSQL "fast shutdown") and resolves *only* on the child's `exit` event,
 // with no time bound of its own. Under the loaded serial server shard a slow

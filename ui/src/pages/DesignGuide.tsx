@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Github } from "@/components/GithubIcon";
 import { InlineBanner } from "@/components/InlineBanner";
 import { BuiltInLifecycleChip } from "@/components/BuiltInAgentBadges";
 import { Input } from "@/components/ui/input";
@@ -428,7 +429,7 @@ export function DesignGuide() {
           <SubSection title="App components">
             <div className="flex flex-wrap gap-2">
               {[
-                "StatusBadge", "StatusIcon", "PriorityIcon", "EntityRow", "EmptyState", "MetricCard",
+                "GithubIcon", "StatusBadge", "StatusIcon", "PriorityIcon", "EntityRow", "EmptyState", "MetricCard",
                 "FilterBar", "InlineEditor", "PageSkeleton", "Identity", "CommentThread", "MarkdownEditor",
                 "PropertiesPanel", "Sidebar", "CommandPalette", "EnvironmentVariablesEditor",
                 "InlineBanner", "BuiltInAgentGate", "BuiltInLifecycleChip",
@@ -570,6 +571,15 @@ export function DesignGuide() {
             <Button variant="outline"><Upload /> Upload</Button>
             <Button variant="destructive"><Trash2 /> Delete</Button>
             <Button size="sm"><Plus /> Add</Button>
+          </div>
+        </SubSection>
+
+        <SubSection title="GitHub icon">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Github aria-label="GitHub" className="size-4" />
+            <Github aria-label="GitHub" className="size-5" />
+            <Github aria-label="GitHub" className="size-6" />
+            <span className="text-sm">Shared icon retained for GitHub references.</span>
           </div>
         </SubSection>
 

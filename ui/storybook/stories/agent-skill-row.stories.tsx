@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Folder, Github } from "lucide-react";
+import { Folder } from "lucide-react";
+import { Github } from "@/components/GithubIcon";
 import { AgentSkillRow, type AgentSkillRowData } from "@/pages/agent-skills/AgentSkillRow";
 
 const ENABLED: AgentSkillRowData = {

@@ -32,7 +32,7 @@ export const statusCardRefreshPolicySchema = z
     intervalMinutes: z.number().int().positive().optional(),
     debounceSeconds: z.number().int().positive().optional(),
     maxUpdatesPerHour: z.number().int().positive().optional(),
-    triggers: statusCardRefreshTriggersSchema.default({}),
+    triggers: statusCardRefreshTriggersSchema.prefault({}),
     activeHours: z
       .object({
         start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
@@ -61,41 +61,41 @@ export const statusCardFingerprintSchema = z.record(
     latestHumanCommentAt: z.string().datetime().nullable().optional(),
     identifier: z.string().nullable().optional(),
     title: z.string().optional(),
-    assigneeAgentId: z.string().uuid().nullable().optional(),
+    assigneeAgentId: z.guid().nullable().optional(),
     assigneeUserId: z.string().nullable().optional(),
   }),
 );
 
 export const statusCardSchema = z.object({
-  id: z.string().uuid(),
-  companyId: z.string().uuid(),
+  id: z.guid(),
+  companyId: z.guid(),
   createdByUserId: z.string().nullable(),
-  createdByAgentId: z.string().uuid().nullable(),
+  createdByAgentId: z.guid().nullable(),
   title: z.string().nullable(),
   titlePinned: z.boolean(),
   interestPrompt: z.string(),
   queries: z.array(companySearchQuerySchema),
   queryVersion: z.number().int().nonnegative(),
   queryCompiledAt: z.string().datetime().nullable(),
-  queryCompiledByAgentId: z.string().uuid().nullable(),
-  agentId: z.string().uuid().nullable(),
+  queryCompiledByAgentId: z.guid().nullable(),
+  agentId: z.guid().nullable(),
   refreshPolicy: statusCardRefreshPolicySchema,
   state: statusCardStateSchema,
   pendingChangeCount: z.number().int().nonnegative(),
   lastChangeAt: z.string().datetime().nullable(),
   fingerprint: statusCardFingerprintSchema.nullable(),
   fingerprintAt: z.string().datetime().nullable(),
-  mentionedIssueIds: z.array(z.string().uuid()).default([]),
-  documentId: z.string().uuid().nullable(),
+  mentionedIssueIds: z.array(z.guid()).default([]),
+  documentId: z.guid().nullable(),
   lastUpdateRunKind: z.enum(["full", "incremental"]).nullable(),
   lastGeneratedAt: z.string().datetime().nullable(),
   lastModel: z.string().nullable(),
-  generatingIssueId: z.string().uuid().nullable(),
+  generatingIssueId: z.guid().nullable(),
   failureReason: z.string().nullable(),
   nextEvalAt: z.string().datetime().nullable(),
   archivedAt: z.string().datetime().nullable(),
   archivedByUserId: z.string().nullable(),
-  archivedByAgentId: z.string().uuid().nullable(),
+  archivedByAgentId: z.guid().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   summaryBody: z.string().nullable().optional(),
@@ -105,7 +105,7 @@ export const statusCardSchema = z.object({
 });
 
 export const statusCardUpdateChangeSchema = z.object({
-  issueId: z.string().uuid(),
+  issueId: z.guid(),
   identifier: z.string(),
   from: z.string().nullable(),
   to: z.string().nullable(),
@@ -113,12 +113,12 @@ export const statusCardUpdateChangeSchema = z.object({
 });
 
 export const statusCardUpdateSchema = z.object({
-  id: z.string().uuid(),
-  cardId: z.string().uuid(),
+  id: z.guid(),
+  cardId: z.guid(),
   kind: statusCardUpdateKindSchema,
   trigger: statusCardUpdateTriggerSchema,
-  generationIssueId: z.string().uuid().nullable(),
-  runId: z.string().uuid().nullable(),
+  generationIssueId: z.guid().nullable(),
+  runId: z.guid().nullable(),
   changes: z.array(statusCardUpdateChangeSchema),
   inputTokens: z.number().int().nonnegative(),
   outputTokens: z.number().int().nonnegative(),
@@ -133,7 +133,7 @@ export const statusCardUpdateSchema = z.object({
 });
 
 export const statusCardSummaryRevisionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   revisionNumber: z.number().int().positive(),
   title: z.string().nullable(),
   body: z.string(),
@@ -152,7 +152,7 @@ export const createStatusCardSchema = z.object({
   interestPrompt: z.string().trim().min(1).max(20_000),
   title: z.string().trim().min(1).max(300).optional(),
   titlePinned: z.boolean().default(false),
-  agentId: z.string().uuid().nullable().optional(),
+  agentId: z.guid().nullable().optional(),
   refreshPolicy: statusCardRefreshPolicySchema.default(defaultStatusCardRefreshPolicy),
 });
 
@@ -161,7 +161,7 @@ export const patchStatusCardSchema = z
     interestPrompt: z.string().trim().min(1).max(20_000).optional(),
     title: z.string().trim().min(1).max(300).nullable().optional(),
     titlePinned: z.boolean().optional(),
-    agentId: z.string().uuid().nullable().optional(),
+    agentId: z.guid().nullable().optional(),
     refreshPolicy: statusCardRefreshPolicySchema.optional(),
     archived: z.boolean().optional(),
   })
@@ -175,14 +175,14 @@ export const writeStatusCardQuerySchema = z.object({
   queries: z.array(companySearchQuerySchema).min(1).max(10),
   title: z.string().trim().min(1).max(300),
   changeSummary: z.string().trim().min(1).max(2_000),
-  generationIssueId: z.string().uuid(),
+  generationIssueId: z.guid(),
 });
 
 export const writeStatusCardSummarySchema = z.object({
   markdown: z.string().trim().min(1).max(200_000),
   title: z.string().trim().min(1).max(300).optional(),
   changeSummary: z.string().trim().min(1).max(2_000),
-  generationIssueId: z.string().uuid(),
+  generationIssueId: z.guid(),
   model: z.string().trim().min(1).max(200).optional().nullable(),
 });
 

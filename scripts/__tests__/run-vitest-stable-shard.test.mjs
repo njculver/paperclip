@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -30,6 +32,40 @@ function dryRunJson(args) {
 
 const SHARD_COUNT = 5;
 const SERIALIZED_SHARD_COUNT = 5;
+
+test("the runner passes canonical temporary paths and UTC timezone to Vitest", { skip: process.platform === "win32" }, () => {
+  const fixture = mkdtempSync(path.join(os.tmpdir(), "paperclip-runner-paths-"));
+  const output = path.join(fixture, "paths");
+  try {
+    writeFileSync(
+      path.join(fixture, "pnpm"),
+      '#!/bin/sh\nprintf "%s\\n%s\\n%s\\n" "$TMPDIR" "$PAPERCLIP_HOME" "$TZ" > "$PAPERCLIP_TEST_PATH_OUTPUT"\nexit 1\n',
+      { mode: 0o755 },
+    );
+    const result = spawnSync(process.execPath, [script, "--mode", "general", "--group", "general-server"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PATH: `${fixture}${path.delimiter}${process.env.PATH ?? ""}`,
+        PAPERCLIP_TEST_PATH_OUTPUT: output,
+        TZ: "America/Chicago",
+      },
+    });
+    assert.equal(result.status, 1, "the stub stops the runner after its first invocation");
+    const [tmpdir, home, timezone] = readFileSync(output, "utf8").trim().split("\n");
+    try {
+      assert.equal(tmpdir, realpathSync(tmpdir));
+      assert.equal(home, realpathSync(home));
+      assert.equal(path.dirname(tmpdir), path.dirname(home));
+      assert.equal(timezone, "UTC");
+    } finally {
+      rmSync(path.dirname(tmpdir), { recursive: true, force: true });
+    }
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
+});
 
 
 test("the serialized shards form a complete, non-overlapping partition", () => {

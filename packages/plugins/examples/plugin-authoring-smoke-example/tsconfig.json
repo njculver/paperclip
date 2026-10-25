@@ -9,6 +9,7 @@
     ],
     "jsx": "react-jsx",
     "strict": true,
+    "types": ["node"],
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,

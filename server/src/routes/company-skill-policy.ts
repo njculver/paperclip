@@ -1,7 +1,7 @@
 import { Router, type NextFunction, type Request, type Response } from "express";
 import type { Db } from "@paperclipai/db";
 import { evaluateSkillPolicySchema, replaceSkillPolicySchema } from "@paperclipai/shared";
-import { ZodError, type ZodSchema } from "zod";
+import { ZodError, type ZodType } from "zod";
 import { forbidden, HttpError, unprocessable } from "../errors.js";
 import { accessService } from "../services/access.js";
 import { companySkillPolicyService, type SkillPolicyPrincipal } from "../services/company-skill-policy.js";
@@ -12,7 +12,7 @@ export function companySkillPolicyRoutes(db: Db) {
   const access = accessService(db);
   const policies = companySkillPolicyService(db);
 
-  function validatePolicyBody(schema: ZodSchema) {
+  function validatePolicyBody(schema: ZodType) {
     return (req: Request, _res: Response, next: NextFunction) => {
       try {
         req.body = schema.parse(req.body);

@@ -95,7 +95,6 @@ import {
   Folder,
   FolderKanban,
   FolderOpen,
-  Github,
   KeyRound,
   Link2,
   Loader2,
@@ -108,6 +107,7 @@ import {
   XCircle,
   XOctagon,
 } from "lucide-react";
+import { Github } from "../components/GithubIcon";
 
 // Matches design §11 breakpoints. Module-level so stories and the page agree.
 const DESKTOP_MIN = 1024;

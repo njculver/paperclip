@@ -147,6 +147,18 @@ function loadSpecRoutes() {
 }
 
 describe("openapi routes", () => {
+  it("documents sparse updates without create-time defaults", async () => {
+    const res = await request(createApp()).get("/api/openapi.json");
+    expect(res.status).toBe(200);
+    const update = res.body.paths["/api/companies/{companyId}"].patch
+      ?? res.body.paths["/api/companies/{companyId}"].put;
+    expect(update).toBeDefined();
+    const schema = update.requestBody.content["application/json"].schema;
+    expect(schema.required ?? []).toEqual([]);
+    expect(schema.properties.budgetMonthlyCents).toMatchObject({ type: "integer", minimum: 0 });
+    expect(schema.properties.budgetMonthlyCents).not.toHaveProperty("default");
+  });
+
   it("serves the generated OpenAPI document", async () => {
     const res = await request(createApp()).get("/api/openapi.json");
 

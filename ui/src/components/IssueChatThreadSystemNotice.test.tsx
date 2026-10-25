@@ -12,7 +12,6 @@ import type { Agent, SuccessfulRunHandoffState } from "@paperclipai/shared";
 
 vi.mock("@assistant-ui/react", () => ({
   AssistantRuntimeProvider: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  useAui: () => ({ thread: () => ({ append: async () => undefined }) }),
 }));
 
 vi.mock("./transcript/useLiveRunTranscripts", () => ({

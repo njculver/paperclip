@@ -30,7 +30,7 @@ export const addDecisionQueueItemSchema = z.object({
 
 export const removeDecisionQueueItemSchema = z.object({
   reason: z.string().trim().max(2_000).optional(),
-}).strict().default({});
+}).strict().prefault({});
 
 const calendarDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
   const parsed = new Date(`${value}T00:00:00.000Z`);

@@ -1,3 +1,4 @@
+import { partialWithoutDefaults } from "./partial.js";
 import { z } from "zod";
 import { DEFAULT_FEEDBACK_DATA_SHARING_PREFERENCE } from "../types/feedback.js";
 import {
@@ -36,7 +37,7 @@ export const instanceGeneralSettingsSchema = z.object({
   executionMode: z.enum(["kubernetes", "any"]).optional(),
 }).strict();
 
-export const patchInstanceGeneralSettingsSchema = instanceGeneralSettingsSchema.partial();
+export const patchInstanceGeneralSettingsSchema = partialWithoutDefaults(instanceGeneralSettingsSchema);
 
 export const instanceExperimentalSettingsSchema = z.object({
   enableEnvironments: z.boolean().default(false),
@@ -76,12 +77,11 @@ export const instanceExperimentalSettingsSchema = z.object({
     .default(DEFAULT_ISSUE_GRAPH_LIVENESS_AUTO_RECOVERY_LOOKBACK_HOURS),
 }).strict();
 
-export const patchInstanceExperimentalSettingsSchema = instanceExperimentalSettingsSchema
+export const patchInstanceExperimentalSettingsSchema = partialWithoutDefaults(instanceExperimentalSettingsSchema
   .omit({
     worktreeRunExecutionActivatedAt: true,
     worktreeRunExecutionActivationInstanceId: true,
-  })
-  .partial()
+  }))
   .strip();
 
 export const managedSettingMetadataSchema = z.object({
@@ -93,11 +93,11 @@ export const managedSettingMetadataSchema = z.object({
 // instances every overlaid key is listed in `managedKeys`; self-hosted
 // responses omit the field entirely.
 export const instanceExperimentalSettingsWithManagedSchema = instanceExperimentalSettingsSchema.extend({
-  managedKeys: z.record(managedSettingMetadataSchema).optional(),
+  managedKeys: z.record(z.string(), managedSettingMetadataSchema).optional(),
 }).strict();
 
 export const patchInstanceSettingsSchema = z.object({
-  defaultEnvironmentId: z.string().uuid().nullable().optional(),
+  defaultEnvironmentId: z.guid().nullable().optional(),
 }).strict();
 
 export const issueGraphLivenessAutoRecoveryRequestSchema = z.object({
@@ -119,8 +119,8 @@ export type IssueGraphLivenessAutoRecoveryRequest = z.infer<
 >;
 
 export const instanceSettingsSchema = z.object({
-  id: z.string().uuid(),
-  defaultEnvironmentId: z.string().uuid().nullable(),
+  id: z.guid(),
+  defaultEnvironmentId: z.guid().nullable(),
   general: instanceGeneralSettingsSchema,
   experimental: instanceExperimentalSettingsWithManagedSchema,
   createdAt: z.union([z.date(), z.string().datetime()]),

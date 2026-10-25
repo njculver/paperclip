@@ -348,12 +348,17 @@ describe("shared ACPX engine runtime behavior", () => {
       warmHandles,
       createRuntime: (options) => {
         runtimeCreateCount += 1;
-        const patchedOptions = options as AcpRuntimeOptions & {
-          onAgentSpawn?: (meta: { pid: number; startedAt: string }) => Promise<void>;
-        };
         return {
           ensureSession: async () => {
-            await patchedOptions.onAgentSpawn?.({ pid: processPid, startedAt });
+            await options.processLifecycle?.onSpawned?.({
+              pid: processPid,
+              startedAt,
+              launchId: "test-launch",
+              scope: { kind: "runtime-session", sessionKey: "test-session" },
+              command: process.execPath,
+              args: [],
+              cwd: root,
+            });
             return {
               backendSessionId: "backend-session",
               agentSessionId: "agent-session",

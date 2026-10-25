@@ -35,7 +35,6 @@ const fixturePath = path.join(repoRoot, "scripts", "mcp-fixtures", "servers", "a
 const tempRoots: string[] = [];
 
 type PatchedAcpRuntimeOptions = AcpRuntimeOptions & {
-  onAgentSpawn?: (meta: { pid: number; startedAt: string }) => Promise<void>;
   spawnCwd?: string;
 };
 
@@ -67,7 +66,7 @@ async function ensureRealAcpSession(input: {
   const agentCommand = `${JSON.stringify(process.execPath.replaceAll("\\", "/"))} ${JSON.stringify(fixturePath.replaceAll("\\", "/"))}`;
   const runtimeOptions: PatchedAcpRuntimeOptions = {
     cwd: input.cwd,
-    // `spawnCwd` is the host-only knob added by patches/acpx@0.12.0.patch; when
+    // `spawnCwd` is the host-only knob added by patches/acpx@0.21.0.patch; when
     // unset acpx falls back to `cwd`, so every non-proxy lane is byte-identical.
     ...(input.spawnCwd ? { spawnCwd: input.spawnCwd } : {}),
     sessionStore: createRuntimeStore({ stateDir: path.join(stateRoot, "state") }),
@@ -75,7 +74,7 @@ async function ensureRealAcpSession(input: {
     permissionMode: "approve-all",
     nonInteractivePermissions: "deny",
     onAgentStderr: (chunk: string) => stderrChunks.push(chunk),
-    onAgentSpawn: input.onAgentSpawn,
+    processLifecycle: { onSpawned: input.onAgentSpawn },
   };
   const runtime = createAcpRuntime(runtimeOptions);
 

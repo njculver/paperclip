@@ -207,7 +207,7 @@ function makeComment(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe.sequential("issue comment cancel routes", () => {
+describe("issue comment cancel routes", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.doUnmock("@paperclipai/shared/telemetry");

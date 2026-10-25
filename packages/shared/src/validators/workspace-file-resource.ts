@@ -14,11 +14,11 @@ export const workspaceFileResourceKindSchema = z.enum(["file", "directory", "rem
 
 export const workspaceFileRefSchema = z.object({
   kind: z.literal("workspace_file"),
-  issueId: z.string().uuid().optional(),
-  projectId: z.string().uuid().optional(),
+  issueId: z.guid().optional(),
+  projectId: z.guid().optional(),
   projectName: z.string().min(1).optional(),
   workspaceKind: workspaceFileWorkspaceKindSchema,
-  workspaceId: z.string().uuid(),
+  workspaceId: z.guid(),
   relativePath: z.string().min(1),
   line: z.number().int().positive().nullable().optional(),
   column: z.number().int().positive().nullable().optional(),
@@ -26,8 +26,8 @@ export const workspaceFileRefSchema = z.object({
 });
 
 export const workspaceFileResourceQuerySchema = z.object({
-  projectId: z.string().uuid().optional(),
-  workspaceId: z.string().uuid().optional(),
+  projectId: z.guid().optional(),
+  workspaceId: z.guid().optional(),
   path: z
     .string()
     .min(1)
@@ -35,7 +35,7 @@ export const workspaceFileResourceQuerySchema = z.object({
       message: "Workspace file path contains an invalid character",
       params: { code: "invalid_path" },
     }),
-  workspace: workspaceFileSelectorSchema.optional(),
+  workspace: workspaceFileSelectorSchema.unwrap().optional(),
 }).refine((value) => Boolean(value.projectId) === Boolean(value.workspaceId), {
   message: "Workspace file target requires both projectId and workspaceId",
   path: ["workspaceId"],
@@ -43,9 +43,9 @@ export const workspaceFileResourceQuerySchema = z.object({
 });
 
 export const workspaceFileListQuerySchema = z.object({
-  projectId: z.string().uuid().optional(),
-  workspaceId: z.string().uuid().optional(),
-  workspace: workspaceFileSelectorSchema.optional(),
+  projectId: z.guid().optional(),
+  workspaceId: z.guid().optional(),
+  workspace: workspaceFileSelectorSchema.unwrap().optional(),
   path: z
     .string()
     .min(1)
@@ -54,7 +54,7 @@ export const workspaceFileListQuerySchema = z.object({
       params: { code: "invalid_path" },
     })
     .optional(),
-  mode: workspaceFileListModeSchema.optional(),
+  mode: workspaceFileListModeSchema.unwrap().optional(),
   q: z
     .string()
     .refine((value) => !/[\x00-\x1f\x7f]/.test(value), {
@@ -81,8 +81,8 @@ export const resolvedWorkspaceResourceSchema = z.object({
   displayPath: z.string().min(1),
   workspaceLabel: z.string().min(1),
   workspaceKind: workspaceFileWorkspaceKindSchema,
-  workspaceId: z.string().uuid(),
-  projectId: z.string().uuid().nullable().optional(),
+  workspaceId: z.guid(),
+  projectId: z.guid().nullable().optional(),
   projectName: z.string().min(1).nullable().optional(),
   contentType: z.string().nullable().optional(),
   byteSize: z.number().int().nonnegative().nullable().optional(),

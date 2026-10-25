@@ -1,4 +1,5 @@
-import { Boxes, Folder, Github, Link2, Paperclip, type LucideIcon } from "lucide-react";
+import { Boxes, Folder, Link2, Paperclip, type LucideIcon } from "lucide-react";
+import { Github } from "../../components/GithubIcon";
 import type { CompanySkillListItem } from "@paperclipai/shared";
 
 export interface AgentSkillSourceMeta {

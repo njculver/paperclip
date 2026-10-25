@@ -189,7 +189,7 @@ function makeClosedWorkspace() {
   };
 }
 
-describe.sequential("closed isolated workspace issue routes", () => {
+describe("closed isolated workspace issue routes", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.doUnmock("@paperclipai/shared/telemetry");

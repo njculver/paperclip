@@ -1,6 +1,7 @@
 import { isValidElement, memo, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy, ExternalLink, Github, WrapText } from "lucide-react";
+import { Check, Copy, ExternalLink, WrapText } from "lucide-react";
+import { Github } from "./GithubIcon";
 import Markdown, { defaultUrlTransform, type Components, type Options } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "../lib/utils";

@@ -12,8 +12,117 @@ Current implementation status:
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 24.15+ LTS (Node.js 26+ is also supported for development)
 - pnpm 9+
+
+The workspace toolchain uses Vite 8, Vitest 5, and Storybook 10.6. CI uses Node.js
+24. Production UI builds use Oxc minification and remove console calls and
+debugger statements; development builds retain console logging.
+Server suites run sequentially through `server/vitest.config.ts`; use ordinary
+`describe` and `it` calls rather than the removed Vitest `.sequential` aliases.
+The stable test runner sets `TZ=UTC` for deterministic date assertions and uses
+canonical temporary paths to avoid macOS `/tmp` symlink differences.
+Database, adapter-utils, and Claude/Codex/OpenClaw/OpenCode adapter projects run
+tests from source only, not compiled copies under `dist`.
+Local-process filesystem/network sandbox tests require Linux; parsing and
+unsupported-platform checks still run on macOS. The optional Claude MCP isolation
+integration requires a local Claude Code 2.1.207+ CLI in the 2.1 release line.
+
+## TypeScript and Node Types
+
+Active workspace packages use TypeScript 6.0 and Node.js 24 type definitions,
+matching the minimum supported runtime. TypeScript 6 requires explicit ambient
+type inclusion; Node-aware configurations specify `types: ["node"]` (or extend
+the shared base configuration). Plugin scaffolds use the same compiler and Node
+type versions. Keep TypeScript below 7 until the telemetry extractor's compiler
+API integration has been migrated; TypeScript 7 replaces the legacy compiler API.
+
+## Markdown Editor Dependencies
+
+The Markdown editor uses MDXEditor 4 with Lexical 0.48.0. Keep the UI's direct
+`lexical` and `@lexical/link` dependencies aligned with the root Lexical overrides
+and MDXEditor's supported version range. Lexical minor releases before 1.0 can
+contain breaking changes; do not independently bump them beyond that range.
+MDXEditor 4 no longer includes Sandpack; fenced code blocks use CodeMirror.
+Keep Lezer common/highlight aligned through the root overrides: mixed copies
+can collide on syntax-tree property IDs and crash highlighting for code blocks.
+
+## UI Runtime Dependencies
+
+React and React DOM use 19.3.1 across the board UI, active plugin development
+packages, and root overrides; their type packages use 19.3.0. Keep these aligned
+when upgrading. The UI uses Router 7.18.4, Query 5.104.5, Radix UI 1.8.1,
+Base UI 1.9.0, i18next 26.5.10, and react-i18next 17.1.8. The file-browser
+plugin uses CodeMirror language 6.13.1, state 6.7.6, and view 6.43.15.
+
+## Assistant UI Dependencies
+
+The issue-chat runtime uses `@assistant-ui/react` 0.15 with its coordinated
+`@assistant-ui/core` and `@assistant-ui/store` dependencies. Keep these transitive
+packages within the React package's declared ranges rather than overriding them
+independently. Use the property-based scope API (`aui.thread.append(...)`), not
+the deprecated callable accessor (`aui.thread().append(...)`). This API is
+fire-and-forget: the issue composer awaits the shared persistence callback
+directly so pending sends stay disabled and failed sends restore their drafts.
+
+## Zod Validation Dependencies
+
+Workspace validators and the plugin SDK use Zod 4. Use two-argument records
+(`z.record(z.string(), valueSchema)`) and `ZodError.issues`. For PATCH schemas,
+use the shared `partialWithoutDefaults` helper rather than `.partial()` when
+deriving from schemas with defaults: omitted fields must not reset stored values.
+Use `.prefault(...)` when a default input needs parsing to populate nested
+defaults. OpenAPI schemas are generated through `z.toJSONSchema` with the
+OpenAPI 3.0 target, including an explicit JSON date representation.
+Identifier validators use `z.guid()` to preserve Zod 3's acceptance of UUID-shaped
+IDs without introducing Zod 4's stricter UUID version/variant requirements.
+
+## ACP Runtime Dependency
+
+The shared ACP engine pins `acpx` 0.21.0 and bundles its patched runtime for npm
+distribution. The patch retains child stderr routing, the host-only `spawnCwd`
+override for remote relay processes, and Windows command-path handling.
+Environment-map key preservation is now provided upstream. Process identity
+persistence uses upstream `processLifecycle.onSpawned`, which aborts startup and
+terminates the child if persistence rejects. Rebase the patch and run the real
+spawn smoke tests and packaging tests whenever upgrading `acpx`.
+
+Claude and Codex adapters use `@agentclientprotocol/claude-agent-acp` 0.95.0
+and `@agentclientprotocol/codex-acp` 2.2.2. The Claude adapter explicitly
+installs Anthropic SDK 1.3.0 to satisfy the bundled Claude Agent SDK's runtime
+peer requirement rather than retaining the unsupported 0.81 resolution.
+Each ACP adapter supplies its own protocol SDK; do not force those SDKs to
+the same major. Both still negotiate ACP v1 with the shared acpx runtime.
+Run `pnpm test:acp-adapters` to exercise the actual packaged processes with
+isolated config directories and no account credentials or model requests.
+The Codex handshake also starts its bundled native app server; verify it on
+each supported release platform.
+
+## Embedded PostgreSQL Dependency
+
+The database package, server, and CLI pin `embedded-postgres` 18.4.0-beta.17.
+This release supplies PostgreSQL 18.4 and handles portable locale selection and
+child-process environment inheritance upstream, replacing the former local
+patch. npm distributions still bundle the JavaScript runtime and declare its
+platform-native packages as optional dependencies. Verify real database startup,
+migrations, and bundled staging when upgrading; do not replace or reset existing
+local database directories as part of a dependency upgrade.
+
+## Image and Build Tooling Dependencies
+
+Org-chart PNG exports use Sharp 0.35, which supplies its own TypeScript
+definitions; do not install the deprecated `@types/sharp` stub. Active workspace
+TypeScript scripts use tsx 4.23.15, and direct esbuild dependencies and generated
+plugin scaffolds use esbuild 0.28.2. HTTP integration tests use Supertest 7.3.1
+with the shared loopback-binding setup.
+
+## Service SDK Dependencies
+
+The server uses AWS S3 SDK 3.1156.0 and OpenTelemetry API 1.10.0; the Cursor
+Cloud adapter uses Cursor SDK 1.0.40. SDK upgrades should cover S3 request
+serialization and response streams, AWS credential discovery, tracing context
+propagation, and Cursor execution and authentication contracts. Local SDK
+regressions use loopback endpoints or intercepted HTTP rather than live accounts.
 
 ## Dependency Lockfile Policy
 
@@ -44,6 +153,11 @@ This starts:
 `pnpm dev` and `pnpm dev:once` are now idempotent for the current repo and instance: if the matching Paperclip dev runner is already alive, Paperclip reports the existing process instead of starting a duplicate.
 
 Issue execution may also use project execution workspace policies and workspace runtime services for per-project worktrees, preview servers, and managed dev commands. Configure those through the project workspace/runtime surfaces rather than starting long-running unmanaged processes when a task needs a reusable service.
+
+Local runtime-service adoption checks process working directories through `/proc`
+on Linux and `lsof` on macOS. Keep `lsof` available on macOS for service discovery
+after registry loss; port-owner adoption rejects processes whose working directory
+cannot be verified inside the requested workspace.
 
 ### Mobile-friendly preview (`pnpm dev:mobile`)
 

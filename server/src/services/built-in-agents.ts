@@ -415,7 +415,7 @@ const DEFINITIONS = validateBuiltInAgentDefinitions([
     allowedAdapterTypes: ["claude_local", "codex_local", "gemini_local", "opencode_local", "process"],
     defaultAdapterType: "claude_local",
     defaultAdapterConfig: {
-      model: "claude-haiku-4-5",
+      model: "claude-haiku-5-5",
     },
     defaultBudgetMonthlyCents: 0,
     bundle: {

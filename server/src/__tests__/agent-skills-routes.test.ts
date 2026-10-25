@@ -245,7 +245,7 @@ function makeAgent(adapterType: string) {
   };
 }
 
-describe.sequential("agent skill routes", () => {
+describe("agent skill routes", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.doUnmock("../routes/agents.js");

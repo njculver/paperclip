@@ -64,11 +64,20 @@ describe("create-paperclip-plugin entrypoints", () => {
     expect(stdout).toEqual([`Created plugin scaffold at ${outputDir}`]);
     expect(JSON.parse(fs.readFileSync(path.join(outputDir, "package.json"), "utf8"))).toMatchObject({
       name: "demo-plugin",
+      devDependencies: {
+        esbuild: "^0.28.2",
+        "@types/react": "^19.3.0",
+        typescript: "^6.0.3",
+        "@types/node": "^24.19.2",
+      },
       paperclipPlugin: {
         manifest: "./dist/manifest.js",
         worker: "./dist/worker.js",
         ui: "./dist/ui/",
       },
+    });
+    expect(JSON.parse(fs.readFileSync(path.join(outputDir, "tsconfig.json"), "utf8"))).toMatchObject({
+      compilerOptions: { types: ["node"] },
     });
   });
 });
