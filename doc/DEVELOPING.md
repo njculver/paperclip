@@ -44,6 +44,16 @@ The Markdown editor uses MDXEditor 4 with Lexical 0.48.0. Keep the UI's direct
 and MDXEditor's supported version range. Lexical minor releases before 1.0 can
 contain breaking changes; do not independently bump them beyond that range.
 MDXEditor 4 no longer includes Sandpack; fenced code blocks use CodeMirror.
+Keep Lezer common/highlight aligned through the root overrides: mixed copies
+can collide on syntax-tree property IDs and crash highlighting for code blocks.
+
+## UI Runtime Dependencies
+
+React and React DOM use 19.3.1 across the board UI, active plugin development
+packages, and root overrides; their type packages use 19.3.0. Keep these aligned
+when upgrading. The UI uses Router 7.18.4, Query 5.104.5, Radix UI 1.8.1,
+Base UI 1.9.0, i18next 26.5.10, and react-i18next 17.1.8. The file-browser
+plugin uses CodeMirror language 6.13.1, state 6.7.6, and view 6.43.15.
 
 ## Assistant UI Dependencies
 

@@ -66,6 +66,7 @@ describe("create-paperclip-plugin entrypoints", () => {
       name: "demo-plugin",
       devDependencies: {
         esbuild: "^0.28.2",
+        "@types/react": "^19.3.0",
         typescript: "^6.0.3",
         "@types/node": "^24.19.2",
       },

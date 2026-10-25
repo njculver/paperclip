@@ -85,8 +85,10 @@
     },
     "overrides": {
       "rollup": ">=4.59.0",
-      "react": "^19.2.7",
-      "react-dom": "^19.2.7",
+      "react": "^19.3.1",
+      "react-dom": "^19.3.1",
+      "@lezer/common": "1.5.4",
+      "@lezer/highlight": "1.2.5",
       "lexical": "0.48.0",
       "@lexical/clipboard": "0.48.0",
       "@lexical/link": "0.48.0",

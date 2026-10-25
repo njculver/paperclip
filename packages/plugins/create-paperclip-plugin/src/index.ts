@@ -197,7 +197,7 @@ export function scaffoldPluginProject(options: ScaffoldPluginOptions): string {
       "@rollup/plugin-node-resolve": "^16.0.1",
       "@rollup/plugin-typescript": "^12.1.2",
       "@types/node": "^24.19.2",
-      "@types/react": "^19.0.8",
+      "@types/react": "^19.3.0",
       esbuild: "^0.28.2",
       rollup: "^4.38.0",
       tslib: "^2.8.1",

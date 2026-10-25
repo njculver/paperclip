@@ -90,7 +90,8 @@ describe("MarkdownEditor with real MDXEditor and Lexical", () => {
   });
 
   it("renders fenced code in CodeMirror without the removed Sandpack integration", async () => {
-    const markdown = "```txt\nSample output\n```";
+    const errors = vi.spyOn(console, "error");
+    const markdown = "```js\nconst message = 'Sample output';\n```";
 
     await act(async () => {
       root.render(
@@ -101,6 +102,8 @@ describe("MarkdownEditor with real MDXEditor and Lexical", () => {
     await vi.waitFor(() => {
       expect(container.querySelector(".cm-editor")?.textContent).toContain("Sample output");
     });
+    expect(errors.mock.calls.flat().join(" ")).not.toContain("CodeMirror plugin crashed");
+    expect(container.querySelector(".cm-line span")).not.toBeNull();
     expect(container.querySelector("textarea")).toBeNull();
   });
 });
